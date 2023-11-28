@@ -16,6 +16,7 @@ class Square(pygame.sprite.Sprite):
         super().__init__()
         self.image = pygame.image.load(r"Chaos_and_Order\basic_shapes\square.png").convert()
         self.rect = self.image.get_rect(topleft = (pos_x, pos_y))
+        self.empty = True
 
     def clicked(self):
         keys = pygame.key.get_pressed()
@@ -24,18 +25,21 @@ class Square(pygame.sprite.Sprite):
             print("clicked")
 
 
-    def update(self, events, mouse_pos):
+    def update(self, events, mouse_pos, symbol):
         for event in events:
-            if event.type == pygame.MOUSEBUTTONDOWN and self.rect.collidepoint(mouse_pos):
+            if event.type == pygame.MOUSEBUTTONDOWN and self.rect.collidepoint(mouse_pos) and symbol == 'o' and self.empty:
                 self.image = pygame.image.load(r"Chaos_and_Order\basic_shapes\circle.png").convert()
-                print("clicked")
+                self.empty = False
+            elif event.type == pygame.MOUSEBUTTONDOWN and self.rect.collidepoint(mouse_pos) and symbol == 'x' and self.empty:
+                self.image = pygame.image.load(r"Chaos_and_Order\basic_shapes\cross.png").convert()
+                self.empty = False
 
 
 
 
 pygame.init()
 
-screen = pygame.display.set_mode((800, 800))
+screen = pygame.display.set_mode((SIZE * 100, SIZE * 100))
 pygame.display.set_caption('Chaos and Order')
 
 
@@ -59,6 +63,15 @@ clock = pygame.time.Clock()
 
 running = True
 
+symbol = 'x'
+
+def switch_symbol():
+    global symbol
+    if symbol == 'o':
+        symbol = 'x'
+    else:
+        symbol = 'o'
+
 
 while running:
     events = pygame.event.get()
@@ -66,11 +79,16 @@ while running:
     for event in events:
         if event.type == pygame.QUIT:
             running = False
+        if event.type == pygame.KEYDOWN:
+            switch_symbol()
 
             
     square.draw(screen)
-    square.update(events, mouse_pos)
-    # screen.blit(table_surface, (screen.get_width() / 2 - table_surface.get_width() / 2, screen.get_height() / 2 - table_surface.get_height() / 2))
+    square.update(events, mouse_pos, symbol)
+
     pygame.display.update()
     clock.tick(60)
+
 pygame.quit()
+
+# add main menu explaining rules, add logic, add changing symbol
