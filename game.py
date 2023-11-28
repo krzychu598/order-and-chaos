@@ -5,7 +5,7 @@ import numpy as np
 SIZE = 6
 
 table = np.zeros((SIZE, SIZE))
-print(table)
+# print(table)
 
 
 
@@ -34,6 +34,10 @@ class Square(pygame.sprite.Sprite):
                 self.image = pygame.image.load(r"Chaos_and_Order\basic_shapes\cross.png").convert()
                 self.empty = False
 
+    def reset(self):
+        self.__init__()
+
+
 
 
 
@@ -45,26 +49,16 @@ pygame.display.set_caption('Chaos and Order')
 
 square = pygame.sprite.Group()
 
-pos_y = 0
-pos_x = 0
-
-for row in table:
+def create_table():
+    pos_y = 0
     pos_x = 0
-    for rect in row:
-        square.add(Square(pos_x, pos_y))
-        pos_x += 100
-    pos_y += 100
 
-
-
-
-clock = pygame.time.Clock()
-
-
-running = True
-
-symbol = 'x'
-
+    for row in table:
+        pos_x = 0
+        for rect in row:
+            square.add(Square(pos_x, pos_y))
+            pos_x += 100
+        pos_y += 100
 def switch_symbol():
     global symbol
     if symbol == 'o':
@@ -73,18 +67,45 @@ def switch_symbol():
         symbol = 'o'
 
 
+
+
+clock = pygame.time.Clock()
+
+
+running = True
+game_active = False
+symbol = 'x'
+
+create_table()
+
 while running:
     events = pygame.event.get()
     mouse_pos = pygame.mouse.get_pos()
+
     for event in events:
         if event.type == pygame.QUIT:
             running = False
-        if event.type == pygame.KEYDOWN:
-            switch_symbol()
 
-            
-    square.draw(screen)
-    square.update(events, mouse_pos, symbol)
+
+        if game_active:
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
+                switch_symbol()
+
+
+        else:
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
+                square.empty()
+                create_table()
+                game_active = True
+
+
+    if game_active:       
+        square.draw(screen)
+        square.update(events, mouse_pos, symbol)
+
+    else:
+        pass
+
 
     pygame.display.update()
     clock.tick(60)
