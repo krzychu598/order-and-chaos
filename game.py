@@ -1,3 +1,4 @@
+from typing import Any
 import pygame
 import numpy as np
 
@@ -16,6 +17,18 @@ class Square(pygame.sprite.Sprite):
         self.image = pygame.image.load(r"Chaos_and_Order\basic_shapes\square.png").convert()
         self.rect = self.image.get_rect(topleft = (pos_x, pos_y))
 
+    def clicked(self):
+        keys = pygame.key.get_pressed()
+        if keys[pygame.MOUSEBUTTONDOWN]:
+            self.image = pygame.image.load(r"Chaos_and_Order\basic_shapes\circle.png").convert()
+            print("clicked")
+
+
+    def update(self, events, mouse_pos):
+        for event in events:
+            if event.type == pygame.MOUSEBUTTONDOWN and self.rect.collidepoint(mouse_pos):
+                self.image = pygame.image.load(r"Chaos_and_Order\basic_shapes\circle.png").convert()
+                print("clicked")
 
 
 
@@ -43,15 +56,21 @@ for row in table:
 
 clock = pygame.time.Clock()
 
-while True:
-    for event in pygame.event.get():
+
+running = True
+
+
+while running:
+    events = pygame.event.get()
+    mouse_pos = pygame.mouse.get_pos()
+    for event in events:
         if event.type == pygame.QUIT:
-            pygame.quit()
-            quit()
-        if event.type == pygame.MOUSEBUTTONDOWN:
-            mouse_pos = pygame.mouse.get_pos()
+            running = False
+
             
     square.draw(screen)
+    square.update(events, mouse_pos)
     # screen.blit(table_surface, (screen.get_width() / 2 - table_surface.get_width() / 2, screen.get_height() / 2 - table_surface.get_height() / 2))
     pygame.display.update()
     clock.tick(60)
+pygame.quit()
