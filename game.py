@@ -12,30 +12,27 @@ table = np.zeros((SIZE, SIZE))
 
 
 class Square(pygame.sprite.Sprite):
-    def __init__(self, pos_x, pos_y):
+    def __init__(self, pos_x, pos_y, index):
         super().__init__()
-        self.image = pygame.image.load(r"Chaos_and_Order\basic_shapes\square.png").convert()
+        self.image = pygame.image.load(r"Files\square.png").convert()
         self.rect = self.image.get_rect(topleft = (pos_x, pos_y))
         self.empty = True
-
-    def clicked(self):
-        keys = pygame.key.get_pressed()
-        if keys[pygame.MOUSEBUTTONDOWN]:
-            self.image = pygame.image.load(r"Chaos_and_Order\basic_shapes\circle.png").convert()
-            print("clicked")
+        self.index = index
+        self.click_sound = pygame.mixer.Sound(r"Files\click_sound.wav")
 
 
     def update(self, events, mouse_pos, symbol):
+
         for event in events:
             if event.type == pygame.MOUSEBUTTONDOWN and self.rect.collidepoint(mouse_pos) and symbol == 'o' and self.empty:
-                self.image = pygame.image.load(r"Chaos_and_Order\basic_shapes\circle.png").convert()
+                self.image = pygame.image.load(r"Files\circle.png").convert()
                 self.empty = False
-            elif event.type == pygame.MOUSEBUTTONDOWN and self.rect.collidepoint(mouse_pos) and symbol == 'x' and self.empty:
-                self.image = pygame.image.load(r"Chaos_and_Order\basic_shapes\cross.png").convert()
-                self.empty = False
+                self.click_sound.play()
 
-    def reset(self):
-        self.__init__()
+            elif event.type == pygame.MOUSEBUTTONDOWN and self.rect.collidepoint(mouse_pos) and symbol == 'x' and self.empty:
+                self.image = pygame.image.load(r"Files\cross.png").convert()
+                self.empty = False
+                self.click_sound.play()
 
 
 
@@ -45,19 +42,29 @@ pygame.init()
 
 screen = pygame.display.set_mode((SIZE * 100, SIZE * 100))
 pygame.display.set_caption('Chaos and Order')
+clock = pygame.time.Clock()
+font = pygame.font.Font(pygame.font.get_default_font(), 20)
+menu_music = pygame.mixer.Sound(r"Files/menu_music.wav")
 
+text_surface = font.render('Chaos and Order', True, "Red", "black")
+text_rect = text_surface.get_rect(center = (SIZE * 50, 50))
+
+menu_music.set_volume(0.5)
+menu_music.play()
 
 square = pygame.sprite.Group()
 
 def create_table():
     pos_y = 0
     pos_x = 0
+    index = 0
 
     for row in table:
         pos_x = 0
         for rect in row:
-            square.add(Square(pos_x, pos_y))
+            square.add(Square(pos_x, pos_y, index))
             pos_x += 100
+            index += 1
         pos_y += 100
 def switch_symbol():
     global symbol
@@ -69,7 +76,7 @@ def switch_symbol():
 
 
 
-clock = pygame.time.Clock()
+
 
 
 running = True
@@ -104,7 +111,7 @@ while running:
         square.update(events, mouse_pos, symbol)
 
     else:
-        pass
+        screen.blit(text_surface, text_rect)
 
 
     pygame.display.update()
