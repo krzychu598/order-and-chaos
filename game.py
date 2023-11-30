@@ -1,10 +1,11 @@
 import pygame
-import numpy as np
-import ai
+import random
 
 # constants
 SIZE = 6
 CELL_SIZE = 100
+CHAOS_SYMBOL = "x"
+ORDER_SYMBOL = "o"
 
 # files
 chaos_image = pygame.image.load(r"chaos_and_order\Files\cross.png")
@@ -17,8 +18,10 @@ square_image = pygame.transform.scale(square_image, cell_size)
 
 
 # initialize matrix
-table = np.zeros((SIZE, SIZE))
-print(table)
+table = []
+for row in range(SIZE):
+    table.append([0 for _ in range(SIZE)])
+matrix = [list(row) for row in table]
 
 
 class Square(pygame.sprite.Sprite):
@@ -35,26 +38,33 @@ class Square(pygame.sprite.Sprite):
         self._empty = True
         self._click_sound = click_sound
 
-    def update_matrix(self):
-        if self.image == order_image:
-            table[self._row, self._column] = 1
-        elif self.image == chaos_image:
-            table[self._row, self._column] = 2
+    def check_victory(self):
+        pass
 
-    def update(self, symbol):
+    def update_matrix(self, symbol):
+        matrix[self._row][self._column] = symbol
+
+    def update(self, symbol, player):
         if self._empty:
-            if symbol == 'o':
+            if symbol == ORDER_SYMBOL:
                 self.image = order_image
-            elif symbol == 'x':
+            else:
                 self.image = chaos_image
             self._click_sound.play()
             self._empty = False
 
+            self.check_victory()
+            self.update_matrix(symbol)
+
+            if player == "player":
+                ai_move()
+        elif player == "ai":
+            ai_move()
+
     def input(self, events, mouse_pos, symbol):
         for event in events:
             if event.type == pygame.MOUSEBUTTONDOWN and self.rect.collidepoint(mouse_pos):
-                self.update(symbol)
-                ai.ai_move()
+                self.update(symbol, player="player")
 
 
 pygame.init()
@@ -84,7 +94,7 @@ rules_text = ["The player Order strives to create a",
 
 
 menu_music.set_volume(0.5)
-menu_music.play()
+# menu_music.play()
 
 square = pygame.sprite.Group()
 
@@ -100,29 +110,35 @@ def display_text(text_list, font, x_pos, y_pos):
 def create_table():
     row = 0
     column = 0
-
     for vertical in table:
         column = 0
         for rect in vertical:
-            square.add(Square(row, column))
+            table[column][row] = Square(row, column)
+            object = table[column][row]
+            square.add(object)
             column += 1
         row += 1
 
 
 def switch_symbol():
     global symbol
-    if symbol == 'o':
-        symbol = 'x'
+    if symbol == ORDER_SYMBOL:
+        symbol = CHAOS_SYMBOL
     else:
-        symbol = 'o'
+        symbol = ORDER_SYMBOL
+
+
+def ai_move():
+    object = random.choice(square.sprites())
+    symbol = random.choice([ORDER_SYMBOL, CHAOS_SYMBOL])
+    object.update(symbol, player="ai")
 
 
 running = True
 game_active = False
-symbol = 'o'
+symbol = ORDER_SYMBOL
 player = ''
 
-create_table()
 
 while running:
     events = pygame.event.get()
@@ -138,12 +154,12 @@ while running:
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if chaos_rect.collidepoint(mouse_pos):
                     player = "chaos"
-                    print(player)
                 elif order_rect.collidepoint(mouse_pos):
                     player = "order"
-                    print(player)
                 square.empty()
                 create_table()
+                if player == "chaos":
+                    ai_move()
                 game_active = True
                 events.clear()
 
