@@ -1,42 +1,78 @@
 import pygame
 import numpy as np
-import time
+
+# constants
 SIZE = 6
+CELL_SIZE = 100
 
+# files
+chaos_symbol = pygame.image.load(r"chaos_and_order\Files\cross.png")
+order_symbol = pygame.image.load(r"chaos_and_order\Files\circle.png")
+square_symbol = pygame.image.load(r"chaos_and_order\Files\square.png")
+cell_size = list([CELL_SIZE, CELL_SIZE])
+chaos_symbol = pygame.transform.scale(chaos_symbol, cell_size)
+order_symbol = pygame.transform.scale(order_symbol, cell_size)
+square_symbol = pygame.transform.scale(square_symbol, cell_size)
+
+
+# initialize matrix
 table = np.zeros((SIZE, SIZE))
-# print(table)
-
+print(table)
 
 class Square(pygame.sprite.Sprite):
-    def __init__(self, pos_x, pos_y, index):
+    global chaos_symbol, order_symbol, square_symbol, click_sound
+
+    def __init__(self, row, column):
         super().__init__()
-        self.image = pygame.image.load(r"Files\square.png").convert()
-        self.rect = self.image.get_rect(topleft=(pos_x, pos_y))
-        self.empty = True
-        self.index = index
-        self.click_sound = pygame.mixer.Sound(r"Files\click_sound.wav")
+        self.image = square_symbol
+        self._pos_x = column * CELL_SIZE
+        self._pos_y = row * CELL_SIZE
+        self._row = row
+        self._column = column
+        self.rect = self.image.get_rect(topleft=(column * CELL_SIZE, row * CELL_SIZE))
+        self._empty = True
+        self._click_sound = click_sound
+
+    def ai_update(self, symbol):
+        if symbol == 'o':
+            self.image = order_symbol
+        else:
+            self.image = chaos_symbol
+        self.updated()
+
+    def update_matrix(self):
+        if self.image == order_symbol:
+            table[self._row, self._column] = 1
+        elif self.image == chaos_symbol:
+            table[self._row, self._column] = 2
+
+    def updated(self):
+        self._empty = True
+        self._click_sound.play()
+        self._empty = False
 
     def update(self, events, mouse_pos, symbol):
         for event in events:
-            if event.type == pygame.MOUSEBUTTONDOWN and self.rect.collidepoint(mouse_pos) and symbol == 'o' and self.empty:
-                self.image = pygame.image.load(r"Files\circle.png").convert()
-                self.empty = False
-                self.click_sound.play()
-
-            elif event.type == pygame.MOUSEBUTTONDOWN and self.rect.collidepoint(mouse_pos) and symbol == 'x' and self.empty:
-                self.image = pygame.image.load(r"Files\cross.png").convert()
-                self.empty = False
-                self.click_sound.play()
+            if event.type == pygame.MOUSEBUTTONDOWN and self.rect.collidepoint(mouse_pos) and self._empty:
+                if symbol == 'o':
+                    self.image = order_symbol
+                elif symbol == 'x':
+                    self.image = chaos_symbol
+                self.updated()
 
 
 pygame.init()
 
+click_sound = pygame.mixer.Sound(r"chaos_and_order\Files\click_sound.wav")
+menu_music = pygame.mixer.Sound(r"chaos_and_order\Files/menu_music.wav")
 
-screen = pygame.display.set_mode((SIZE * 100, SIZE * 100))
+screen = pygame.display.set_mode((SIZE * CELL_SIZE, SIZE * CELL_SIZE))
 pygame.display.set_caption('Chaos and Order')
 clock = pygame.time.Clock()
 font = pygame.font.Font(pygame.font.get_default_font(), 20)
-menu_music = pygame.mixer.Sound(r"Files/menu_music.wav")
+chaos_symbol.convert()
+order_symbol.convert()
+square_symbol.convert()
 
 title_surface = font.render('Chaos and Order', True, "Red", "black")
 title_rect = title_surface.get_rect(center=(SIZE * 50, 50))
@@ -44,7 +80,7 @@ title_rect = title_surface.get_rect(center=(SIZE * 50, 50))
 order_rect = pygame.Rect((0, 400), (SIZE * 50, 200))
 chaos_rect = pygame.Rect((SIZE * 50, 400), (SIZE * 50, 200))
 
-rules_text = ["The player Order strives to create a", 
+rules_text = ["The player Order strives to create a",
               "five-in-a-row of either Xs or Os.",
               "The opponent Chaos endeavors to prevent this.",
               "Press space to change symbol",
@@ -66,17 +102,15 @@ def display_text(text_list, font, x_pos, y_pos):
 
 
 def create_table():
-    pos_y = 0
-    pos_x = 0
-    index = 0
+    row = 0
+    column = 0
 
-    for row in table:
-        pos_x = 0
-        for rect in row:
-            square.add(Square(pos_x, pos_y, index))
-            pos_x += 100
-            index += 1
-        pos_y += 100
+    for vertical in table:
+        column = 0
+        for rect in vertical:
+            square.add(Square(row, column))
+            column += 1
+        row += 1
 
 
 def switch_symbol():
@@ -127,10 +161,9 @@ while running:
         pygame.draw.rect(screen, "BLUE", order_rect)
         pygame.draw.rect(screen, "RED", chaos_rect)
 
-
     pygame.display.update()
     clock.tick(60)
 
 pygame.quit()
 
-#  add logic, 
+#  add logic
