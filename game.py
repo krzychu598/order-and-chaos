@@ -1,30 +1,32 @@
 import pygame
 import numpy as np
+import ai
 
 # constants
 SIZE = 6
 CELL_SIZE = 100
 
 # files
-chaos_symbol = pygame.image.load(r"chaos_and_order\Files\cross.png")
-order_symbol = pygame.image.load(r"chaos_and_order\Files\circle.png")
-square_symbol = pygame.image.load(r"chaos_and_order\Files\square.png")
+chaos_image = pygame.image.load(r"chaos_and_order\Files\cross.png")
+order_image = pygame.image.load(r"chaos_and_order\Files\circle.png")
+square_image = pygame.image.load(r"chaos_and_order\Files\square.png")
 cell_size = list([CELL_SIZE, CELL_SIZE])
-chaos_symbol = pygame.transform.scale(chaos_symbol, cell_size)
-order_symbol = pygame.transform.scale(order_symbol, cell_size)
-square_symbol = pygame.transform.scale(square_symbol, cell_size)
+chaos_image = pygame.transform.scale(chaos_image, cell_size)
+order_image = pygame.transform.scale(order_image, cell_size)
+square_image = pygame.transform.scale(square_image, cell_size)
 
 
 # initialize matrix
 table = np.zeros((SIZE, SIZE))
 print(table)
 
+
 class Square(pygame.sprite.Sprite):
-    global chaos_symbol, order_symbol, square_symbol, click_sound
+    global chaos_image, order_image, square_image, click_sound
 
     def __init__(self, row, column):
         super().__init__()
-        self.image = square_symbol
+        self.image = square_image
         self._pos_x = column * CELL_SIZE
         self._pos_y = row * CELL_SIZE
         self._row = row
@@ -33,32 +35,26 @@ class Square(pygame.sprite.Sprite):
         self._empty = True
         self._click_sound = click_sound
 
-    def ai_update(self, symbol):
-        if symbol == 'o':
-            self.image = order_symbol
-        else:
-            self.image = chaos_symbol
-        self.updated()
-
     def update_matrix(self):
-        if self.image == order_symbol:
+        if self.image == order_image:
             table[self._row, self._column] = 1
-        elif self.image == chaos_symbol:
+        elif self.image == chaos_image:
             table[self._row, self._column] = 2
 
-    def updated(self):
-        self._empty = True
-        self._click_sound.play()
-        self._empty = False
+    def update(self, symbol):
+        if self._empty:
+            if symbol == 'o':
+                self.image = order_image
+            elif symbol == 'x':
+                self.image = chaos_image
+            self._click_sound.play()
+            self._empty = False
 
-    def update(self, events, mouse_pos, symbol):
+    def input(self, events, mouse_pos, symbol):
         for event in events:
-            if event.type == pygame.MOUSEBUTTONDOWN and self.rect.collidepoint(mouse_pos) and self._empty:
-                if symbol == 'o':
-                    self.image = order_symbol
-                elif symbol == 'x':
-                    self.image = chaos_symbol
-                self.updated()
+            if event.type == pygame.MOUSEBUTTONDOWN and self.rect.collidepoint(mouse_pos):
+                self.update(symbol)
+                ai.ai_move()
 
 
 pygame.init()
@@ -70,9 +66,9 @@ screen = pygame.display.set_mode((SIZE * CELL_SIZE, SIZE * CELL_SIZE))
 pygame.display.set_caption('Chaos and Order')
 clock = pygame.time.Clock()
 font = pygame.font.Font(pygame.font.get_default_font(), 20)
-chaos_symbol.convert()
-order_symbol.convert()
-square_symbol.convert()
+chaos_image.convert()
+order_image.convert()
+square_image.convert()
 
 title_surface = font.render('Chaos and Order', True, "Red", "black")
 title_rect = title_surface.get_rect(center=(SIZE * 50, 50))
@@ -153,7 +149,8 @@ while running:
 
     if game_active:
         square.draw(screen)
-        square.update(events, mouse_pos, symbol)
+        for object in square:
+            object.input(events, mouse_pos, symbol)
 
     else:
         screen.blit(title_surface, title_rect)
