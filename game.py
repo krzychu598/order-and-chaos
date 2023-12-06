@@ -15,7 +15,7 @@ screen = pygame.display.set_mode((screen_size, screen_size))
 pygame.display.set_caption('Chaos and Order')
 clock = pygame.time.Clock()
 font = pygame.font.Font(pygame.font.get_default_font(), 20)
-
+big_font = pygame.font.Font(None, 100)
 # convert images
 chaos_image.convert()
 order_image.convert()
@@ -46,30 +46,33 @@ def switch_symbol(symbol):
 
 def main():
     symbol = ORDER_SYMBOL
-    game_active = False
-    running = True
+    active_screen = "menu"
     player = ''
+    symbol_text = big_font.render(symbol, False, "Black")
+    stop_display_time = pygame.time.get_ticks()
 
     menu_music.set_volume(0.5)
     # menu_music.play()
 
-    while running:
+    while active_screen != None:
+        current_time = pygame.time.get_ticks()
         events = pygame.event.get()
         mouse_pos = pygame.mouse.get_pos()
 
         for event in events:
 
             if event.type == pygame.QUIT:
-                running = False
+                active_screen = None
             if event.type == pygame.MOUSEBUTTONDOWN:
                 click_sound.play()
 
-            if game_active:
+            if active_screen == "game":
                 if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
                     symbol = switch_symbol(symbol)
-                    start_time = pygame.time
+                    symbol_text = big_font.render(symbol, False, "Black")
+                    stop_display_time = current_time + 2000
 
-            else:
+            elif active_screen == "menu":
                 if event.type == pygame.MOUSEBUTTONDOWN:
 
                     if chaos_rect.collidepoint(mouse_pos):
@@ -80,47 +83,53 @@ def main():
                         print("You play as order")
                     if chaos_rect.collidepoint(mouse_pos) or order_rect.collidepoint(mouse_pos):
                         screen.fill("black")
-                        initialize_matrix()
-                        create_sprites()
-
-                        if player == "chaos":
-                            ai_move()
-
-                        game_active = True
+                        active_screen = "menu2"
                         events.clear()
 
-        if game_active:
-            if check_victory() == "order won":
-                if player == "order":
-                    print("Order won! You win!") #you win
+            elif active_screen == "manu2":
+                if event.type == pygame.MOUSEBUTTONDOWN:
+
+                    if pvp_rect.collidepoint(mouse_pos):
+                        print("you play against another player") #what then
+                    if random_rect.collidepoint(mouse_pos):
+                        print("your opponent plays randomly")
+                    if ai_rect.collidepoint(mouse_pos):
+                        print("you play against an ai")
+                    screen.fill("black")
+                    initialize_matrix()
+                    create_sprites()
+
+                    if player == "chaos":
+                        ai_move()
+                    active_screen = "game"
+                    events.clear()
+                    
+
+        if active_screen == "game":
+            square.draw(screen)
+            for object in square:
+                object.input(events, mouse_pos, symbol)
+
+            if check_victory():
+                win = True if player == check_victory() else False
+                if win:
                     win_sound.play()
                 else:
-                    print("Order won!, You lose!") #you lose
                     lose_sound.play()
                 screen.fill("black")
-                game_active = False
-            elif check_victory() == "chaos won":
-                if player == "chaos":
-                    print("Chaos won! You win!") #you win
-                    win_sound.play()
-                else:
-                    print("Chaos won!, You lose!") #you lose
-                    lose_sound.play()
-                screen.fill("black")
-                game_active = False
-            else:
-                square.draw(screen)
-                for object in square:
-                    object.input(events, mouse_pos, symbol)
-        else:
+                active_screen = False
+
+        elif active_screen == "menu":
             screen.blit(title_surface, title_rect)
             display_text(rules_text, font, screen_size // 2, 200)
             pygame.draw.rect(screen, "BLUE", order_rect)
             pygame.draw.rect(screen, "RED", chaos_rect)
 
+        if current_time < stop_display_time:
+            screen.blit(symbol_text, symbol_text.get_rect(center = screen.get_rect().center))
+
         pygame.display.update()
         clock.tick(60)
-        pygame.time.Clock.tick
 
     pygame.quit()
 

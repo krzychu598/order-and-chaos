@@ -48,7 +48,7 @@ def check_victory():
                 cross_squares += 1
                 circle_squares = 0
             if circle_squares == WIN_CONDITION or cross_squares == WIN_CONDITION:
-                return "order won"
+                return "order"
 
     for column in range(SIZE):
             row = 0
@@ -63,7 +63,7 @@ def check_victory():
                     cross_squares += 1
                     circle_squares = 0
                 if circle_squares == WIN_CONDITION or cross_squares == WIN_CONDITION:
-                    return "order won"
+                    return "order"
                 row += 1
 
     for diagonal in range(SIZE - 1):
@@ -81,7 +81,7 @@ def check_victory():
                 cross_squares += 1
                 circle_squares = 0
             if circle_squares == WIN_CONDITION or cross_squares == WIN_CONDITION:
-                return "order won"
+                return "order"
             i += 1
             j += 1
 
@@ -99,7 +99,7 @@ def check_victory():
                     cross_squares += 1
                     circle_squares = 0
                 if circle_squares == WIN_CONDITION or cross_squares == WIN_CONDITION:
-                    return "order won"
+                    return "order"
                 i += 1
                 j += 1
 
@@ -116,7 +116,7 @@ def check_victory():
                 cross_squares += 1
                 circle_squares = 0
             if circle_squares == WIN_CONDITION or cross_squares == WIN_CONDITION:
-                return "order won"
+                return "order"
             i -= 1
             j += 1
 
@@ -133,13 +133,13 @@ def check_victory():
                 cross_squares += 1
                 circle_squares = 0
             if circle_squares == WIN_CONDITION or cross_squares == WIN_CONDITION:
-                return "order won"
+                return "order"
             i -= 1
             j += 1
     
     free_square = [sprite for sprite in square.sprites() if sprite.is_empty]
     if not free_square:
-        return "chaos won"
+        return "chaos"
         
     return
 
