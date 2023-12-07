@@ -21,19 +21,32 @@ def create_sprites():
 
 
 def initialize_matrix():
+    """Initialize matrix"""
     global matrix, table
     table = [[0 for _ in range(SIZE)] for row in range(SIZE)]
     matrix = [list(row) for row in table]
 
+def opponent_move(game_mode):
+    if game_mode == "pvp":
+        # it displays on screen that it is player 2 turn
+        pass
+    if game_mode == "random_ai":
+        random_ai_move()
+    if game_mode == "smart_ai":
+        smart_ai_move()
 
-def ai_move():
+def random_ai_move():
+    """Move of random ai"""
     free_square = [square for square in square.sprites() if square.is_empty]
     if not free_square:
         return
     object = random.choice(free_square)
     symbol = random.choice([ORDER_SYMBOL, CHAOS_SYMBOL])
-    object.update(symbol, player="ai")
+    object.update(symbol, player="ai", game_mode="random_ai")
 
+def smart_ai_move():
+    """Move of smart ai"""
+    pass
 
 def check_victory():
     
@@ -162,11 +175,10 @@ class Square(pygame.sprite.Sprite):
     def is_empty(self):
         return self._empty
         
-
     def update_matrix(self, symbol):
         matrix[self._row][self._column] = symbol
 
-    def update(self, symbol, player):
+    def update(self, symbol, player, game_mode):
         if self._empty:
             if symbol == ORDER_SYMBOL:
                 self.image = order_image
@@ -179,9 +191,9 @@ class Square(pygame.sprite.Sprite):
 
 
             if player == "player":
-                ai_move()
+                opponent_move(game_mode)
 
-    def input(self, events, mouse_pos, symbol):
+    def input(self, events, mouse_pos, symbol, game_mode):
         for event in events:
             if event.type == pygame.MOUSEBUTTONDOWN and self.rect.collidepoint(mouse_pos):
-                self.update(symbol, player="player")
+                self.update(symbol, player="player", game_mode = game_mode)
