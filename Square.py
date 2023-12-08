@@ -1,6 +1,15 @@
 import pygame
-from constants import SIZE, CELL_SIZE, CHAOS_SYMBOL, ORDER_SYMBOL, WIN_CONDITION, chaos_image, order_image, square_image
-from functions import check_victory, opponent_move
+from constants import (
+    SIZE,
+    CELL_SIZE,
+    CHAOS_SYMBOL,
+    ORDER_SYMBOL,
+    WIN_CONDITION,
+    chaos_image,
+    order_image,
+    square_image,
+)
+from functions import check_victory, opponent_move, matrix
 
 
 # Square class
@@ -20,11 +29,11 @@ class Square(pygame.sprite.Sprite):
     @property
     def is_empty(self):
         return self._empty
-        
+
     def update_matrix(self, symbol):
         matrix[self._row][self._column] = symbol
 
-    def update(self, symbol, player, game_mode):
+    def update(self, symbol):
         if self._empty:
             if symbol == ORDER_SYMBOL:
                 self.image = order_image
@@ -33,13 +42,11 @@ class Square(pygame.sprite.Sprite):
 
             self._empty = False
             self.update_matrix(symbol)
-            check_victory(matrix)
-
-
-            if player == "player":
-                opponent_move(game_mode)
 
     def input(self, events, mouse_pos, symbol, game_mode):
         for event in events:
-            if event.type == pygame.MOUSEBUTTONDOWN and self.rect.collidepoint(mouse_pos):
-                self.update(symbol, player="player", game_mode = game_mode)
+            if event.type == pygame.MOUSEBUTTONDOWN and self.rect.collidepoint(
+                mouse_pos
+            ):
+                self.update(symbol)
+                opponent_move(game_mode)

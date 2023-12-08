@@ -2,6 +2,9 @@ import pygame
 import random
 from constants import CHAOS_SYMBOL, ORDER_SYMBOL, SIZE, WIN_CONDITION, square
 
+table = []
+matrix = []
+
 
 def display_text(screen, text_list, font, x_pos, y_pos):
     for text in text_list:
@@ -33,7 +36,7 @@ def switch_symbol(symbol):
     return symbol
 
 
-def check_victory(matrix):
+def check_victory():
     for row in matrix:
         circle_squares = 0
         cross_squares = 0
@@ -156,10 +159,10 @@ def create_sprites(sprite_class):
 
 
 def initialize_matrix():
-    """Initialize matrix"""
     global matrix, table
-    table = [[0 for _ in range(SIZE)] for row in range(SIZE)]
-    matrix = [list(row) for row in table]
+    """Initialize matrix"""
+    table += [[0 for _ in range(SIZE)] for row in range(SIZE)]
+    matrix += [list(row) for row in table]
 
 
 def opponent_move(game_mode):
@@ -179,7 +182,7 @@ def random_ai_move():
         return
     object = random.choice(free_square)
     symbol = random.choice([ORDER_SYMBOL, CHAOS_SYMBOL])
-    object.update(symbol, player="ai", game_mode="random_ai")
+    object.update(symbol)
 
 
 def smart_ai_move():

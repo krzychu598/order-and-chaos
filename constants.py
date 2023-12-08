@@ -8,13 +8,21 @@ CELL_SIZE = max(CELL_SIZE, MIN_SCREEN_SIZE // SIZE)
 CHAOS_SYMBOL = "x"
 ORDER_SYMBOL = "o"
 WIN_CONDITION = 5
-
-rules_text = ["Order and Chaos", "", "", "",
-              "The player Order strives to create a",
-              "five-in-a-row of either Xs or Os.",
-              "The opponent Chaos endeavors to prevent this.",
-              "Press space to change symbol",
-              "Who you wanna play as?"]
+screen_size = max(SIZE * CELL_SIZE, MIN_SCREEN_SIZE)
+half_screen = screen_size // 2
+SCREEN_SIZE = (screen_size, screen_size)
+CENTER = (half_screen, half_screen)
+rules_text = [
+    "Order and Chaos",
+    "",
+    "",
+    "",
+    "The player Order strives to create a",
+    "five-in-a-row of either Xs or Os.",
+    "The opponent Chaos endeavors to prevent this.",
+    "Press space to change symbol",
+    "Who you wanna play as?",
+]
 
 # load images
 chaos_image = pygame.image.load(r"chaos_and_order\Files\cross.png")
