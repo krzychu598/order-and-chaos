@@ -2,12 +2,11 @@ import pygame
 from functions import (
     display_text,
     display_rects,
-    switch_symbol,
     opponent_move,
-    initialize_matrix,
     create_sprites,
     check_victory,
-    matrix,
+    StateOfTheGame,
+    state,
 )
 from constants import (
     ORDER_SYMBOL,
@@ -20,43 +19,6 @@ from constants import (
 )
 
 from Square import Square
-
-
-class StateOfTheGame:
-    def __init__(self):
-        self._symbol = ORDER_SYMBOL
-        self._game_mode = None
-        self._order_or_chaos = None
-
-    @property
-    def get_symbol(self):
-        return self._symbol
-
-    def set_symbol(self, symbol):
-        self._symbol = symbol
-
-    @property
-    def get_game_mode(self):
-        return self._game_mode
-
-    def set_game_mode(self, game_mode):
-        self._game_mode = game_mode
-
-    @property
-    def get_order_or_chaos(self):
-        return self._order_or_chaos
-
-    def set_order_or_chaos(self, order_or_chaos):
-        self._order_or_chaos = order_or_chaos
-
-    def switch_symbol(self):
-        if self._symbol == ORDER_SYMBOL:
-            self._symbol = CHAOS_SYMBOL
-        else:
-            self._symbol = ORDER_SYMBOL
-
-
-state = StateOfTheGame()
 
 
 class Scene:
@@ -146,7 +108,7 @@ class ChooseMode(Scene):
                     next = True
                 if next:
                     self.screen.fill("black")
-                    initialize_matrix()
+                    state.__init__()
                     create_sprites(Square)
 
                     if state.get_order_or_chaos == "chaos":
@@ -180,7 +142,13 @@ class Game(Scene):
                 state.switch_symbol()
                 self.stop_display_time = self.current_time + 1200
         for object in square:
-            object.input(events, mouse_pos, state.get_symbol, state.get_game_mode)
+            object.input(
+                events,
+                mouse_pos,
+                state.get_symbol,
+                state.get_game_mode,
+                state.get_order_or_chaos,
+            )
 
     def Update(self):
         if check_victory():

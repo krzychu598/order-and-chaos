@@ -2,8 +2,57 @@ import pygame
 import random
 from constants import CHAOS_SYMBOL, ORDER_SYMBOL, SIZE, WIN_CONDITION, square
 
-table = []
-matrix = []
+
+class StateOfTheGame:
+    def __init__(self):
+        self._symbol = ORDER_SYMBOL
+        self._game_mode = None
+        self._order_or_chaos = None
+        self.table = [[0 for _ in range(SIZE)] for row in range(SIZE)]
+        self.matrix = [list(row) for row in self.table]
+
+    @property
+    def get_symbol(self):
+        return self._symbol
+
+    def set_symbol(self, symbol):
+        self._symbol = symbol
+
+    @property
+    def get_game_mode(self):
+        return self._game_mode
+
+    def set_game_mode(self, game_mode):
+        self._game_mode = game_mode
+
+    @property
+    def get_order_or_chaos(self):
+        return self._order_or_chaos
+
+    def set_order_or_chaos(self, order_or_chaos):
+        self._order_or_chaos = order_or_chaos
+
+    def switch_symbol(self):
+        if self._symbol == ORDER_SYMBOL:
+            self._symbol = CHAOS_SYMBOL
+        else:
+            self._symbol = ORDER_SYMBOL
+
+    def create_sprites(self, sprite_class):
+        square.empty()
+        row = 0
+        column = 0
+        for vertical in self.table:
+            column = 0
+            for rect in vertical:
+                self.table[column][row] = sprite_class(row, column)
+                object = self.table[column][row]
+                square.add(object)
+                column += 1
+            row += 1
+
+
+state = StateOfTheGame()
 
 
 def display_text(screen, text_list, font, x_pos, y_pos):
@@ -28,16 +77,8 @@ def display_rects(screen, rects_with_text_list, font):
         i += 1
 
 
-def switch_symbol(symbol):
-    if symbol == ORDER_SYMBOL:
-        symbol = CHAOS_SYMBOL
-    else:
-        symbol = ORDER_SYMBOL
-    return symbol
-
-
 def check_victory():
-    for row in matrix:
+    for row in state.matrix:
         circle_squares = 0
         cross_squares = 0
         for cell in row:
@@ -55,7 +96,7 @@ def check_victory():
         circle_squares = 0
         cross_squares = 0
         while row < SIZE:
-            cell = matrix[row][column]
+            cell = state.matrix[row][column]
             if cell == ORDER_SYMBOL:
                 circle_squares += 1
                 cross_squares = 0
@@ -72,7 +113,7 @@ def check_victory():
         i = diagonal
         j = 0
         while i < SIZE and j < SIZE:
-            cell = matrix[i][j]
+            cell = state.matrix[i][j]
             if cell == ORDER_SYMBOL:
                 circle_squares += 1
                 cross_squares = 0
@@ -90,7 +131,7 @@ def check_victory():
             i = 0
             j = diagonal
             while i < SIZE and j < SIZE:
-                cell = matrix[i][j]
+                cell = state.matrix[i][j]
                 if cell == ORDER_SYMBOL:
                     circle_squares += 1
                     cross_squares = 0
@@ -107,7 +148,7 @@ def check_victory():
         i = SIZE - 1
         j = diagonal
         while i >= 0 and j < SIZE:
-            cell = matrix[i][j]
+            cell = state.matrix[i][j]
             if cell == ORDER_SYMBOL:
                 circle_squares += 1
                 cross_squares = 0
@@ -124,7 +165,7 @@ def check_victory():
         i = SIZE - diagonal - 1
         j = 0
         while i >= 0 and j < SIZE:
-            cell = matrix[i][j]
+            cell = state.matrix[i][j]
             if cell == ORDER_SYMBOL:
                 circle_squares += 1
                 cross_squares = 0
@@ -148,31 +189,24 @@ def create_sprites(sprite_class):
     square.empty()
     row = 0
     column = 0
-    for vertical in table:
+    for vertical in state.table:
         column = 0
         for rect in vertical:
-            table[column][row] = sprite_class(row, column)
-            object = table[column][row]
+            state.table[column][row] = sprite_class(row, column)
+            object = state.table[column][row]
             square.add(object)
             column += 1
         row += 1
 
 
-def initialize_matrix():
-    global matrix, table
-    """Initialize matrix"""
-    table += [[0 for _ in range(SIZE)] for row in range(SIZE)]
-    matrix += [list(row) for row in table]
-
-
-def opponent_move(game_mode):
+def opponent_move(game_mode, order_or_chaos):
     if game_mode == "pvp":
         # it displays on screen that it is player 2 turn
         pass
     if game_mode == "random_ai":
         random_ai_move()
     if game_mode == "smart_ai":
-        smart_ai_move()
+        smart_ai_move(order_or_chaos)
 
 
 def random_ai_move():
@@ -185,6 +219,6 @@ def random_ai_move():
     object.update(symbol)
 
 
-def smart_ai_move():
+def smart_ai_move(game_mode):
     """Move of smart ai"""
     pass

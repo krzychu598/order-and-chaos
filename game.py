@@ -1,14 +1,12 @@
 import pygame
 from constants import (
-    CHAOS_SYMBOL,
-    ORDER_SYMBOL,
     chaos_image,
     order_image,
     square_image,
     SCREEN_SIZE,
 )
 from functions import check_victory
-from scenes import Menu, ChooseMode, Game, GameOver
+from scenes import Menu, Game
 
 
 def main():
@@ -43,7 +41,7 @@ def main():
 
     # set music
     menu_music.set_volume(0.5)
-    menu_music.play()
+    # menu_music.play()
 
     # main game loop
     while active_scene is not None:
