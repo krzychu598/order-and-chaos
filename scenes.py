@@ -52,6 +52,8 @@ class Menu(Scene):
             (half_screen, 400), (half_screen, half_screen // 2)
         )
         self._main_menu = [(self._order_rect, "Order"), (self._chaos_rect, "Chaos")]
+        state.__init__()
+        create_sprites(Square)
 
     def ProcessInput(self, events, mouse_pos, current_time):
         for event in events:
@@ -107,12 +109,8 @@ class ChooseMode(Scene):
                     state.set_game_mode("smart_ai")
                     next = True
                 if next:
-                    self.screen.fill("black")
-                    state.__init__()
-                    create_sprites(Square)
-
-                    if state.get_order_or_chaos == "chaos":
-                        opponent_move(state.get_game_mode)
+                    if state.order_or_chaos == "chaos":
+                        opponent_move(state.game_mode, "chaos")
                     self.SwitchToScene(Game(self.screen))
 
     def Update(self):
@@ -145,19 +143,17 @@ class Game(Scene):
             object.input(
                 events,
                 mouse_pos,
-                state.get_symbol,
-                state.get_game_mode,
-                state.get_order_or_chaos,
+                state.symbol,
             )
 
     def Update(self):
         if check_victory():
-            win = True if state.get_order_or_chaos == check_victory() else False
+            win = True if state.order_or_chaos == check_victory() else False
             self.SwitchToScene(GameOver(self.screen, win))
 
     def Render(self, screen, extra_font, *args, **kwargs):
         square.draw(screen)
-        self.symbol_text = extra_font.render(state.get_symbol, True, "Black")
+        self.symbol_text = extra_font.render(state.symbol, True, "Black")
 
         if self.current_time < self.stop_display_time:
             screen.blit(self.symbol_text, self.symbol_text.get_rect(center=CENTER))

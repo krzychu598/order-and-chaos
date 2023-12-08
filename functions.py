@@ -5,38 +5,26 @@ from constants import CHAOS_SYMBOL, ORDER_SYMBOL, SIZE, WIN_CONDITION, square
 
 class StateOfTheGame:
     def __init__(self):
-        self._symbol = ORDER_SYMBOL
-        self._game_mode = None
-        self._order_or_chaos = None
+        self.symbol = ORDER_SYMBOL
+        self.game_mode = None
+        self.order_or_chaos = None
         self.table = [[0 for _ in range(SIZE)] for row in range(SIZE)]
         self.matrix = [list(row) for row in self.table]
 
-    @property
-    def get_symbol(self):
-        return self._symbol
-
     def set_symbol(self, symbol):
-        self._symbol = symbol
-
-    @property
-    def get_game_mode(self):
-        return self._game_mode
+        self.symbol = symbol
 
     def set_game_mode(self, game_mode):
-        self._game_mode = game_mode
-
-    @property
-    def get_order_or_chaos(self):
-        return self._order_or_chaos
+        self.game_mode = game_mode
 
     def set_order_or_chaos(self, order_or_chaos):
-        self._order_or_chaos = order_or_chaos
+        self.order_or_chaos = order_or_chaos
 
     def switch_symbol(self):
-        if self._symbol == ORDER_SYMBOL:
-            self._symbol = CHAOS_SYMBOL
+        if self.symbol == ORDER_SYMBOL:
+            self.symbol = CHAOS_SYMBOL
         else:
-            self._symbol = ORDER_SYMBOL
+            self.symbol = ORDER_SYMBOL
 
     def create_sprites(self, sprite_class):
         square.empty()
@@ -67,7 +55,7 @@ def display_text(screen, text_list, font, x_pos, y_pos):
 
 
 def display_rects(screen, rects_with_text_list, font):
-    colors = ["green", "blue", "red", "yellow"]
+    colors = ["blue", "red", "green", "yellow"]
     i = 0
     for rect, text in rects_with_text_list:
         pygame.draw.rect(screen, colors[i], rect)
@@ -125,23 +113,22 @@ def check_victory():
             i += 1
             j += 1
 
-        if diagonal != 0:
-            circle_squares = 0
-            cross_squares = 0
-            i = 0
-            j = diagonal
-            while i < SIZE and j < SIZE:
-                cell = state.matrix[i][j]
-                if cell == ORDER_SYMBOL:
-                    circle_squares += 1
-                    cross_squares = 0
-                if cell == CHAOS_SYMBOL:
-                    cross_squares += 1
-                    circle_squares = 0
-                if circle_squares == WIN_CONDITION or cross_squares == WIN_CONDITION:
-                    return "order"
-                i += 1
-                j += 1
+        circle_squares = 0
+        cross_squares = 0
+        i = 0
+        j = diagonal
+        while i < SIZE and j < SIZE:
+            cell = state.matrix[i][j]
+            if cell == ORDER_SYMBOL:
+                circle_squares += 1
+                cross_squares = 0
+            if cell == CHAOS_SYMBOL:
+                cross_squares += 1
+                circle_squares = 0
+            if circle_squares == WIN_CONDITION or cross_squares == WIN_CONDITION:
+                return "order"
+            i += 1
+            j += 1
 
         circle_squares = 0
         cross_squares = 0
@@ -221,4 +208,5 @@ def random_ai_move():
 
 def smart_ai_move(game_mode):
     """Move of smart ai"""
+
     pass

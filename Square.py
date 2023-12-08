@@ -41,11 +41,10 @@ class Square(pygame.sprite.Sprite):
             self._empty = False
             self.update_matrix(symbol)
 
-    def input(self, events, mouse_pos, symbol, game_mode, order_or_chaos):
-        order_or_chaos = order_or_chaos
+    def input(self, events, mouse_pos, symbol):
         for event in events:
             if event.type == pygame.MOUSEBUTTONDOWN and self.rect.collidepoint(
                 mouse_pos
             ):
                 self.update(symbol)
-                opponent_move(game_mode, order_or_chaos)
+                opponent_move(state.game_mode, state.order_or_chaos)
