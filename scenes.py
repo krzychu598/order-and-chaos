@@ -5,12 +5,14 @@ from functions import (
     opponent_move,
     create_sprites,
     check_victory,
-    StateOfTheGame,
-    state,
+    initialize,
+    set_order_or_chaos,
+    set_game_mode,
+    switch_symbol,
+    update_square,
+    get_symbol,
 )
 from constants import (
-    ORDER_SYMBOL,
-    CHAOS_SYMBOL,
     CENTER,
     rules_text,
     square,
@@ -31,9 +33,6 @@ class Scene:
     def ProcessInput(self):
         pass
 
-    def Update(self):
-        pass
-
     def Render(self):
         pass
 
@@ -52,28 +51,22 @@ class Menu(Scene):
             (half_screen, 400), (half_screen, half_screen // 2)
         )
         self._main_menu = [(self._order_rect, "Order"), (self._chaos_rect, "Chaos")]
-        state.__init__()
+        initialize()
         create_sprites(Square)
 
     def ProcessInput(self, events, mouse_pos, current_time):
         for event in events:
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if self._chaos_rect.collidepoint(mouse_pos):
-                    state.set_order_or_chaos("chaos")
+                    set_order_or_chaos("chaos")
                     self.SwitchToScene(ChooseMode(self.screen))
                 elif self._order_rect.collidepoint(mouse_pos):
-                    state.set_order_or_chaos("order")
+                    set_order_or_chaos("order")
                     self.SwitchToScene(ChooseMode(self.screen))
-
-    def Update(self):
-        pass
 
     def Render(self, screen, font, *args, **kwargs):
         display_text(screen, rules_text, font, screen_size // 2, 50)
         display_rects(screen, self._main_menu, font)
-
-    def SwitchToScene(self, next_scene):
-        return super().SwitchToScene(next_scene)
 
 
 class ChooseMode(Scene):
@@ -98,23 +91,19 @@ class ChooseMode(Scene):
                 next = False
                 if self._pvp_rect.collidepoint(mouse_pos):
                     print("you play against another player")
-                    state.set_game_mode("pvp")
+                    set_game_mode("pvp")
                     next = True
                 if self._random_rect.collidepoint(mouse_pos):
                     print("your opponent plays randomly")
-                    state.set_game_mode("random_ai")
+                    set_game_mode("random_ai")
                     next = True
                 if self._ai_rect.collidepoint(mouse_pos):
                     print("you play against an ai")
-                    state.set_game_mode("smart_ai")
+                    set_game_mode("smart_ai")
                     next = True
                 if next:
-                    if state.order_or_chaos == "chaos":
-                        opponent_move(state.game_mode, "chaos")
+                    opponent_move(begin=True)
                     self.SwitchToScene(Game(self.screen))
-
-    def Update(self):
-        pass
 
     def Render(self, screen, font, *args, **kwargs):
         display_text(
@@ -137,32 +126,28 @@ class Game(Scene):
         for event in events:
             """Switch symbol if space pressed"""
             if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
-                state.switch_symbol()
+                switch_symbol()
                 self.stop_display_time = self.current_time + 1200
-        for object in square:
-            object.input(
-                events,
-                mouse_pos,
-                state.symbol,
-            )
 
-    def Update(self):
-        if check_victory():
-            win = True if state.order_or_chaos == check_victory() else False
-            self.SwitchToScene(GameOver(self.screen, win))
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                """Updates clicked square"""
+                update_square(mouse_pos)
+                if check_victory() is not None:
+                    set_game_mode("game over")
+                    self.SwitchToScene(GameOver(self.screen, check_victory()))
 
     def Render(self, screen, extra_font, *args, **kwargs):
         square.draw(screen)
-        self.symbol_text = extra_font.render(state.symbol, True, "Black")
+        self.symbol_text = extra_font.render(get_symbol(), True, "Black")
 
         if self.current_time < self.stop_display_time:
             screen.blit(self.symbol_text, self.symbol_text.get_rect(center=CENTER))
 
 
 class GameOver(Scene):
-    def __init__(self, screen, win):
+    def __init__(self, screen, who_won):
         super().__init__(screen)
-        self._state = win
+        self._won = who_won
         self._play_again = pygame.Rect((0, 200), (half_screen, half_screen // 2))
         self._quit = pygame.Rect((half_screen, 200), (half_screen, half_screen // 2))
         self._over_options = [(self._play_again, "Play again"), (self._quit, "Quit")]
@@ -175,13 +160,10 @@ class GameOver(Scene):
                 elif self._quit.collidepoint(mouse_pos):
                     self.Terminate()
 
-    def Update(self):
-        pass
-
     def Render(self, screen, font, *args, **kwargs):
         display_text(
             screen,
-            [f"You won" if self._state else "You lost"],
+            [f"{self._won.upper()} won"],
             font,
             screen_size // 2,
             50,

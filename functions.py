@@ -1,11 +1,15 @@
 import pygame
 import random
-from constants import CHAOS_SYMBOL, ORDER_SYMBOL, SIZE, WIN_CONDITION, square
+from constants import CROSS, CIRCLE, SIZE, TO_WIN, square
 
 
 class StateOfTheGame:
+    """
+    This class monitors state of different variables in the game
+    """
+
     def __init__(self):
-        self.symbol = ORDER_SYMBOL
+        self.symbol = CIRCLE
         self.game_mode = None
         self.order_or_chaos = None
         self.table = [[0 for _ in range(SIZE)] for row in range(SIZE)]
@@ -21,10 +25,10 @@ class StateOfTheGame:
         self.order_or_chaos = order_or_chaos
 
     def switch_symbol(self):
-        if self.symbol == ORDER_SYMBOL:
-            self.symbol = CHAOS_SYMBOL
+        if self.symbol == CIRCLE:
+            self.symbol = CROSS
         else:
-            self.symbol = ORDER_SYMBOL
+            self.symbol = CIRCLE
 
     def create_sprites(self, sprite_class):
         square.empty()
@@ -43,7 +47,44 @@ class StateOfTheGame:
 state = StateOfTheGame()
 
 
+def initialize():
+    state.__init__()
+
+
+def set_order_or_chaos(chaos_or_order):
+    state.set_order_or_chaos(chaos_or_order)
+
+
+def set_game_mode(game_mode):
+    state.set_game_mode(game_mode)
+
+
+def switch_symbol():
+    state.switch_symbol()
+
+
+def update_square(mouse_pos):
+    for object in square:
+        if object.rect.collidepoint(mouse_pos):
+            object.update(state.symbol)
+
+
+def get_symbol():
+    return state.symbol
+
+
+def get_game_mode():
+    return state.game_mode
+
+
+def get_order_or_chaos():
+    return state.order_or_chaos
+
+
 def display_text(screen, text_list, font, x_pos, y_pos):
+    """
+    Function helps to display text in list format
+    """
     for text in text_list:
         if not text:
             y_pos += 30
@@ -55,6 +96,9 @@ def display_text(screen, text_list, font, x_pos, y_pos):
 
 
 def display_rects(screen, rects_with_text_list, font):
+    """
+    Function displays choice boxes
+    """
     colors = ["blue", "red", "green", "yellow"]
     i = 0
     for rect, text in rects_with_text_list:
@@ -65,114 +109,79 @@ def display_rects(screen, rects_with_text_list, font):
         i += 1
 
 
+def update_matrix(row, column, symbol):
+    state.matrix[row][column] = symbol
+
+
 def check_victory():
+    """
+    Functions checks if one side has won the game
+    """
+
+    def check_line(line):
+        circle_squares = cross_squares = 0
+        for cell in line:
+            if cell == CIRCLE:
+                circle_squares += 1
+                cross_squares = 0
+            elif cell == CROSS:
+                cross_squares += 1
+                circle_squares = 0
+            if circle_squares == TO_WIN or cross_squares == TO_WIN:
+                return "order"
+        return None
+
+    # check rows
     for row in state.matrix:
-        circle_squares = 0
-        cross_squares = 0
-        for cell in row:
-            if cell == ORDER_SYMBOL:
-                circle_squares += 1
-                cross_squares = 0
-            if cell == CHAOS_SYMBOL:
-                cross_squares += 1
-                circle_squares = 0
-            if circle_squares == WIN_CONDITION or cross_squares == WIN_CONDITION:
-                return "order"
+        result = check_line(row)
+        if result:
+            return result
 
+    # check columns
     for column in range(SIZE):
-        row = 0
-        circle_squares = 0
-        cross_squares = 0
-        while row < SIZE:
-            cell = state.matrix[row][column]
-            if cell == ORDER_SYMBOL:
-                circle_squares += 1
-                cross_squares = 0
-            if cell == CHAOS_SYMBOL:
-                cross_squares += 1
-                circle_squares = 0
-            if circle_squares == WIN_CONDITION or cross_squares == WIN_CONDITION:
-                return "order"
-            row += 1
+        result = check_line(state.matrix[row][column] for row in range(SIZE))
+        if result:
+            return result
 
-    for diagonal in range(SIZE - WIN_CONDITION + 1):
-        circle_squares = 0
-        cross_squares = 0
-        i = diagonal
-        j = 0
-        while i < SIZE and j < SIZE:
-            cell = state.matrix[i][j]
-            if cell == ORDER_SYMBOL:
-                circle_squares += 1
-                cross_squares = 0
-            if cell == CHAOS_SYMBOL:
-                cross_squares += 1
-                circle_squares = 0
-            if circle_squares == WIN_CONDITION or cross_squares == WIN_CONDITION:
-                return "order"
-            i += 1
-            j += 1
+    # check diagonals
+    row = column = 0
+    for diagonal in range(SIZE):
+        # main diagonals
+        result = check_line(
+            state.matrix[diagonal + i][i] for i in range(SIZE - diagonal)
+        )
+        if result:
+            return result
 
-        circle_squares = 0
-        cross_squares = 0
-        i = 0
-        j = diagonal
-        while i < SIZE and j < SIZE:
-            cell = state.matrix[i][j]
-            if cell == ORDER_SYMBOL:
-                circle_squares += 1
-                cross_squares = 0
-            if cell == CHAOS_SYMBOL:
-                cross_squares += 1
-                circle_squares = 0
-            if circle_squares == WIN_CONDITION or cross_squares == WIN_CONDITION:
-                return "order"
-            i += 1
-            j += 1
+        result = check_line(
+            state.matrix[i][diagonal + i] for i in range(SIZE - diagonal)
+        )
+        if result:
+            return result
 
-        circle_squares = 0
-        cross_squares = 0
-        i = SIZE - 1
-        j = diagonal
-        while i >= 0 and j < SIZE:
-            cell = state.matrix[i][j]
-            if cell == ORDER_SYMBOL:
-                circle_squares += 1
-                cross_squares = 0
-            if cell == CHAOS_SYMBOL:
-                cross_squares += 1
-                circle_squares = 0
-            if circle_squares == WIN_CONDITION or cross_squares == WIN_CONDITION:
-                return "order"
-            i -= 1
-            j += 1
+        # reverse diagonals
+        if diagonal <= SIZE - TO_WIN:
+            result = check_line(
+                state.matrix[SIZE - diagonal - 1 - i][i] for i in range(SIZE - diagonal)
+            )
+            if result:
+                return result
 
-        circle_squares = 0
-        cross_squares = 0
-        i = SIZE - diagonal - 1
-        j = 0
-        while i >= 0 and j < SIZE:
-            cell = state.matrix[i][j]
-            if cell == ORDER_SYMBOL:
-                circle_squares += 1
-                cross_squares = 0
-            if cell == CHAOS_SYMBOL:
-                cross_squares += 1
-                circle_squares = 0
-            if circle_squares == WIN_CONDITION or cross_squares == WIN_CONDITION:
-                return "order"
-            i -= 1
-            j += 1
+            result = check_line(
+                state.matrix[SIZE - 1 - i][diagonal + i] for i in range(SIZE - diagonal)
+            )
+            if result:
+                return result
 
     free_square = [sprite for sprite in square.sprites() if sprite.is_empty]
     if not free_square:
         return "chaos"
 
-    return
+    return None
 
 
 def create_sprites(sprite_class):
-    """Create sprites"""
+    """Create sprites -- displayed squares"""
     square.empty()
     row = 0
     column = 0
@@ -186,14 +195,23 @@ def create_sprites(sprite_class):
         row += 1
 
 
-def opponent_move(game_mode, order_or_chaos):
+def opponent_move(begin=False):
+    """
+    Move of the opponent
+    """
+    if begin == True and state.order_or_chaos == "order":
+        return
+    game_mode = state.game_mode
+    order_or_chaos = state.order_or_chaos
     if game_mode == "pvp":
         # it displays on screen that it is player 2 turn
         pass
     if game_mode == "random_ai":
         random_ai_move()
     if game_mode == "smart_ai":
-        smart_ai_move(order_or_chaos)
+        smart_ai_move()
+    if game_mode is None:
+        raise ValueError("Game mode is not set")
 
 
 def random_ai_move():
@@ -202,11 +220,76 @@ def random_ai_move():
     if not free_square:
         return
     object = random.choice(free_square)
-    symbol = random.choice([ORDER_SYMBOL, CHAOS_SYMBOL])
-    object.update(symbol)
+    symbol = random.choice([CIRCLE, CROSS])
+    object.update(symbol, player="ai")
 
 
-def smart_ai_move(game_mode):
+def smart_ai_move():
     """Move of smart ai"""
 
-    pass
+    def check_line(line):
+        circle_squares = cross_squares = 0
+        for cell in line:
+            if cell == CIRCLE:
+                circle_squares += 1
+                cross_squares = 0
+            elif cell == CROSS:
+                cross_squares += 1
+                circle_squares = 0
+            if circle_squares == TO_WIN or cross_squares == TO_WIN:
+                return "order"
+        return None
+
+    # check rows
+    for row in state.matrix:
+        result = check_line(row)
+        if result:
+            return result
+
+    # check columns
+    for column in range(SIZE):
+        result = check_line(state.matrix[row][column] for row in range(SIZE))
+        if result:
+            return result
+
+    # check diagonals
+    row = column = 0
+    for diagonal in range(SIZE):
+        # main diagonals
+        result = check_line(
+            state.matrix[diagonal + i][i] for i in range(SIZE - diagonal)
+        )
+        if result:
+            return result
+
+        result = check_line(
+            state.matrix[i][diagonal + i] for i in range(SIZE - diagonal)
+        )
+        if result:
+            return result
+
+        # reverse diagonals
+        if diagonal <= SIZE - TO_WIN:
+            result = check_line(
+                state.matrix[SIZE - diagonal - 1 - i][i] for i in range(SIZE - diagonal)
+            )
+            if result:
+                return result
+
+            result = check_line(
+                state.matrix[SIZE - 1 - i][diagonal + i] for i in range(SIZE - diagonal)
+            )
+            if result:
+                return result
+
+    free_square = [sprite for sprite in square.sprites() if sprite.is_empty]
+    if not free_square:
+        return "chaos"
+    if state.order_or_chaos == "order":
+        # play as chaos
+        pass
+    elif state.order_or_chaos == "chaos":
+        # play as order
+        pass
+    else:
+        raise ValueError("order_or_chaos not set")
