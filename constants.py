@@ -27,9 +27,9 @@ rules_text = [
 ]
 
 # load images
-chaos_image = pygame.image.load(r"chaos_and_order/Files/cross.png")
-order_image = pygame.image.load(r"chaos_and_order/Files/circle.png")
-square_image = pygame.image.load(r"chaos_and_order/Files/square.png")
+chaos_image = pygame.image.load(r"Files/cross.png")
+order_image = pygame.image.load(r"Files/circle.png")
+square_image = pygame.image.load(r"Files/square.png")
 
 # transform images
 chaos_image = pygame.transform.scale(chaos_image, cell_size)
