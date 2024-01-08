@@ -232,9 +232,7 @@ def smart_ai_move():
                 else:
                     best_move.current_symbol = potential_symbol
                 best_move.current_best_square = potential_square
-                best_move.max_symbol_amount = symbol_amount
-                print(best_move.max_symbol_amount, best_move.current_symbol, best_move.current_best_square._row, best_move.current_best_square._column)
-        
+                best_move.max_symbol_amount = symbol_amount        
     # convert square.sprites() list to 2D array square_table
     square_table = []
     start = 0
@@ -320,8 +318,5 @@ def smart_ai_move():
     
     if best_move.current_best_square:
         best_move.current_best_square.update(best_move.current_symbol, player="ai")
-        print("put")
     else:
         random_ai_move()
-        print("was random")
-
