@@ -22,17 +22,24 @@ class Square(pygame.sprite.Sprite):
         self._column = column
         self.rect = self.image.get_rect(topleft=(column * CELL_SIZE, row * CELL_SIZE))
         self._empty = True
+        self._symbol = "empty"
 
     @property
     def is_empty(self):
         return self._empty
+    
+    @property
+    def what_symbol(self):
+        return self._symbol
 
     def update(self, symbol, player="you"):
         if self._empty:
             if symbol == CIRCLE:
                 self.image = order_image
+                self._symbol = symbol
             else:
                 self.image = chaos_image
+                self._symbol = symbol
 
             self._empty = False
             update_matrix(self._row, self._column, symbol)

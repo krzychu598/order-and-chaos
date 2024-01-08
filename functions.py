@@ -46,7 +46,6 @@ class StateOfTheGame:
 
 state = StateOfTheGame()
 
-
 def initialize():
     state.__init__()
 
@@ -202,7 +201,6 @@ def opponent_move(begin=False):
     if begin == True and state.order_or_chaos == "order":
         return
     game_mode = state.game_mode
-    order_or_chaos = state.order_or_chaos
     if game_mode == "pvp":
         # it displays on screen that it is player 2 turn
         pass
@@ -226,70 +224,15 @@ def random_ai_move():
 
 def smart_ai_move():
     """Move of smart ai"""
-
-    def check_line(line):
-        circle_squares = cross_squares = 0
-        for cell in line:
-            if cell == CIRCLE:
-                circle_squares += 1
-                cross_squares = 0
-            elif cell == CROSS:
-                cross_squares += 1
-                circle_squares = 0
-            if circle_squares == TO_WIN or cross_squares == TO_WIN:
-                return "order"
-        return None
-
     # check rows
-    for row in state.matrix:
-        result = check_line(row)
-        if result:
-            return result
-
-    # check columns
-    for column in range(SIZE):
-        result = check_line(state.matrix[row][column] for row in range(SIZE))
-        if result:
-            return result
-
-    # check diagonals
-    row = column = 0
-    for diagonal in range(SIZE):
-        # main diagonals
-        result = check_line(
-            state.matrix[diagonal + i][i] for i in range(SIZE - diagonal)
-        )
-        if result:
-            return result
-
-        result = check_line(
-            state.matrix[i][diagonal + i] for i in range(SIZE - diagonal)
-        )
-        if result:
-            return result
-
-        # reverse diagonals
-        if diagonal <= SIZE - TO_WIN:
-            result = check_line(
-                state.matrix[SIZE - diagonal - 1 - i][i] for i in range(SIZE - diagonal)
-            )
-            if result:
-                return result
-
-            result = check_line(
-                state.matrix[SIZE - 1 - i][diagonal + i] for i in range(SIZE - diagonal)
-            )
-            if result:
-                return result
+    
 
     free_square = [sprite for sprite in square.sprites() if sprite.is_empty]
-    if not free_square:
-        return "chaos"
-    if state.order_or_chaos == "order":
-        # play as chaos
-        pass
-    elif state.order_or_chaos == "chaos":
-        # play as order
-        pass
-    else:
+
+    if state.order_or_chaos is None:
         raise ValueError("order_or_chaos not set")
+    
+    object = random.choice(free_square)
+    symbol = random.choice([CIRCLE, CROSS])
+    object.update(symbol, player="ai")
+    
