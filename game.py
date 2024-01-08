@@ -10,6 +10,9 @@ from scenes import Menu
 
 
 def game():
+    """
+    Main function to run the Order and Chaos game.
+    """
     pygame.init()
 
     # display screen
@@ -19,7 +22,7 @@ def game():
     # initialize clock
     clock = pygame.time.Clock()
 
-    # load sounds
+    # load sounds and handle potential exceptions on non-Windows platforms
     do_sounds_work = True
     try:
         click_sound = pygame.mixer.Sound(r"Files/click_sound.wav")
@@ -31,7 +34,8 @@ def game():
     except pygame.error:
         do_sounds_work = False
         print("sounds work only on Windows")
-    # create fonts
+
+    # create fonts for text rendering
     font = pygame.font.Font(pygame.font.get_default_font(), 20)
     big_font = pygame.font.Font(None, 100)
 
@@ -40,22 +44,22 @@ def game():
     order_image.convert()
     square_image.convert()
 
-    # initial settings
+    # set initial scene to Menu
     active_scene = Menu(screen)
 
-    # set music
+    # Set up music if sound is enabled
     if do_sounds_work == True:
         music.set_volume(0.3)
         music.play()
 
     # main game loop
     while active_scene is not None:
-        # get current state
+        # get the current state
         current_time = pygame.time.get_ticks()
         events = pygame.event.get()
         mouse_pos = pygame.mouse.get_pos()
 
-        # events that could always happen
+        # handle events that could always happen
         for event in events:
             if event.type == pygame.QUIT:
                 active_scene = None
@@ -68,7 +72,7 @@ def game():
 
         # change of scene
         if active_scene != active_scene.next_scene:
-            # play game over sounds
+            # play game over sounds if sound is enabled
             if get_game_mode() == "game over" and do_sounds_work == True:
                 if get_order_or_chaos() == check_victory():
                     win_sound.play()
@@ -76,6 +80,7 @@ def game():
                     lose_sound.play()
             active_scene = active_scene.next_scene
 
+            # Clear the screen and events for the next scene
             screen.fill("black")
             events.clear()
 

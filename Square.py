@@ -11,6 +11,9 @@ from functions import opponent_move, update_matrix
 
 # Square class
 class Square(pygame.sprite.Sprite):
+    """
+    class representing a single square on screen
+    """
     global chaos_image, order_image, square_image
 
     def __init__(self, row, column):

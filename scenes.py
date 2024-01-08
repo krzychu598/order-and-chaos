@@ -22,8 +22,14 @@ from constants import (
 
 from Square import Square
 
+# in this module scenes are created.
+# Depending on the current scene different things are being displayed on screen
+# also input is being processed differently
 
 class Scene:
+    """
+    Base scene
+    """
     def __init__(self, screen):
         self.screen = screen
         self.next_scene = self
@@ -44,6 +50,9 @@ class Scene:
 
 
 class Menu(Scene):
+    """
+    Menu to choose game role
+    """
     def __init__(self, screen):
         super().__init__(screen)
         self._order_rect = pygame.Rect((0, 400), (half_screen, half_screen // 2))
@@ -70,6 +79,9 @@ class Menu(Scene):
 
 
 class ChooseMode(Scene):
+    """
+    Menu to choose game mode allows to play against another player, random ai and smart ai
+    """
     def __init__(self, screen):
         super().__init__(screen)
         self._pvp_rect = pygame.Rect((0, 200), (half_screen, half_screen // 2))
@@ -117,6 +129,9 @@ class ChooseMode(Scene):
 
 
 class Game(Scene):
+    """
+    Menu handling events in game
+    """
     def __init__(self, screen):
         super().__init__(screen)
 
@@ -145,6 +160,9 @@ class Game(Scene):
 
 
 class GameOver(Scene):
+    """
+    Game over scene allows to play again or quit
+    """
     def __init__(self, screen, who_won):
         super().__init__(screen)
         self._won = who_won
