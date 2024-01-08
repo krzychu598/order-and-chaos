@@ -24,8 +24,8 @@ def game():
     # music = pygame.mixer.Sound(r"chaos_and_order/Files/menu_music.wav")
     # lose_sound = pygame.mixer.Sound(r"chaos_and_order/Files/Files/lose_sound.wav")
     # win_sound = pygame.mixer.Sound(r"chaos_and_order/Files/win_sound.wav")
-    # lose_sound.set_volume(0.5)
-    # win_sound.set_volume(0.5)
+    # lose_sound.set_volume(0.3)
+    # win_sound.set_volume(0.3)
 
     # create fonts
     font = pygame.font.Font(pygame.font.get_default_font(), 20)

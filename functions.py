@@ -30,19 +30,6 @@ class StateOfTheGame:
         else:
             self.symbol = CIRCLE
 
-    def create_sprites(self, sprite_class):
-        square.empty()
-        row = 0
-        column = 0
-        for vertical in self.table:
-            column = 0
-            for rect in vertical:
-                self.table[column][row] = sprite_class(row, column)
-                object = self.table[column][row]
-                square.add(object)
-                column += 1
-            row += 1
-
 
 state = StateOfTheGame()
 
@@ -224,15 +211,117 @@ def random_ai_move():
 
 def smart_ai_move():
     """Move of smart ai"""
-    # check rows
-    
+    order_or_chaos = get_order_or_chaos()
+    class BestMove:
+        def __init__(self):
+            self.max_symbol_amount = 0
+            self.current_symbol = None
+            self.current_best_square = None
+   
+    best_move = BestMove()
 
-    free_square = [sprite for sprite in square.sprites() if sprite.is_empty]
+    def decide_best_move(result):
+        if result[0]:
+            (potential_square, potential_symbol, symbol_amount) = result
+            if max(symbol_amount, best_move.max_symbol_amount) == symbol_amount:
+                if order_or_chaos == "order":
+                    if potential_symbol == CROSS:
+                        best_move.current_symbol = CIRCLE
+                    else:
+                        best_move.current_symbol = CROSS
+                else:
+                    best_move.current_symbol = potential_symbol
+                best_move.current_best_square = potential_square
+                best_move.max_symbol_amount = symbol_amount
+                print(best_move.max_symbol_amount, best_move.current_symbol, best_move.current_best_square._row, best_move.current_best_square._column)
+        
+    # convert square.sprites() list to 2D array square_table
+    square_table = []
+    start = 0
+    for row in range(SIZE):
+        square_table.append(list(square.sprites())[start:start+SIZE])
+        start += SIZE
+
+
+
+    def check_line(line):
+        line = list(line)
+        circle_squares = cross_squares = 0
+        possible_circle = possible_cross = 0
+        possible_win = None
+        best_square = None
+        symbol_amount = None
+        can_win = False
+        # is it possible to create a line?
+        for cell in line:
+            if cell.what_symbol == CIRCLE:
+                circle_squares += 1
+                possible_circle += 1
+                possible_cross = 0
+            elif cell.what_symbol == CROSS:
+                cross_squares += 1
+                possible_cross += 1
+                possible_circle = 0
+            elif cell.what_symbol == "empty":
+                possible_circle +=1
+                possible_cross += 1
+            if possible_circle == TO_WIN or possible_cross == TO_WIN:
+                can_win = True
+        
+
+        if can_win:
+            if cross_squares > circle_squares:
+                possible_win = CROSS
+                symbol_amount = cross_squares
+            if circle_squares >= cross_squares:
+                possible_win = CIRCLE
+                symbol_amount = circle_squares
+            previous_cell = line[0]
+            for cell in line:
+                if cell.what_symbol == "empty" and previous_cell.what_symbol == possible_win:
+                    best_square = cell
+                    break
+                if cell.what_symbol == possible_win and previous_cell.what_symbol == "empty":
+                    best_square = previous_cell
+                    break
+                previous_cell = cell
+
+
+        return best_square, possible_win, symbol_amount
+
+    # check rows
+    for row in square_table:
+        decide_best_move(check_line(row))
+
+
+    # check columns
+    for column in range(SIZE):
+        decide_best_move(list(check_line(square_table[row][column] for row in range(SIZE))))
+
+                    
+
+    # check diagonals
+    row = column = 0
+    for diagonal in range(SIZE):
+        # main diagonals
+        decide_best_move(list(check_line(square_table[diagonal + i][i] for i in range(SIZE - diagonal))))
+
+        decide_best_move(list(check_line(square_table[i][diagonal + i] for i in range(SIZE - diagonal))))
+
+        # reverse diagonals
+        if diagonal <= SIZE - TO_WIN:
+            decide_best_move(list(check_line(square_table[SIZE - diagonal - 1 - i][i] for i in range(SIZE - diagonal))))
+
+            decide_best_move(list(check_line(square_table[SIZE - 1 - i][diagonal + i] for i in range(SIZE - diagonal))))
+
 
     if state.order_or_chaos is None:
         raise ValueError("order_or_chaos not set")
     
-    object = random.choice(free_square)
-    symbol = random.choice([CIRCLE, CROSS])
-    object.update(symbol, player="ai")
-    
+    if best_move.current_best_square:
+        best_move.current_best_square.update(best_move.current_symbol, player="ai")
+        print("put")
+    else:
+        random_ai_move()
+        print("was random")
+
