@@ -14,6 +14,7 @@ class Square(pygame.sprite.Sprite):
     """
     class representing a single square on screen
     """
+
     global chaos_image, order_image, square_image
 
     def __init__(self, row, column):
@@ -30,7 +31,7 @@ class Square(pygame.sprite.Sprite):
     @property
     def is_empty(self):
         return self._empty
-    
+
     @property
     def what_symbol(self):
         return self._symbol

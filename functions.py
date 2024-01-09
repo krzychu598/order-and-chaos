@@ -33,6 +33,7 @@ class StateOfTheGame:
 
 state = StateOfTheGame()
 
+
 def initialize():
     state.__init__()
 
@@ -189,7 +190,6 @@ def opponent_move(begin=False):
         return
     game_mode = state.game_mode
     if game_mode == "pvp":
-        # it displays on screen that it is player 2 turn
         pass
     if game_mode == "random_ai":
         random_ai_move()
@@ -212,12 +212,13 @@ def random_ai_move():
 def smart_ai_move():
     """Move of smart ai"""
     order_or_chaos = get_order_or_chaos()
+
     class BestMove:
         def __init__(self):
             self.max_symbol_amount = 0
             self.current_symbol = None
             self.current_best_square = None
-   
+
     best_move = BestMove()
 
     def decide_best_move(result):
@@ -232,15 +233,14 @@ def smart_ai_move():
                 else:
                     best_move.current_symbol = potential_symbol
                 best_move.current_best_square = potential_square
-                best_move.max_symbol_amount = symbol_amount        
+                best_move.max_symbol_amount = symbol_amount
+
     # convert square.sprites() list to 2D array square_table
     square_table = []
     start = 0
     for row in range(SIZE):
-        square_table.append(list(square.sprites())[start:start+SIZE])
+        square_table.append(list(square.sprites())[start : start + SIZE])
         start += SIZE
-
-
 
     def check_line(line):
         line = list(line)
@@ -261,11 +261,10 @@ def smart_ai_move():
                 possible_cross += 1
                 possible_circle = 0
             elif cell.what_symbol == "empty":
-                possible_circle +=1
+                possible_circle += 1
                 possible_cross += 1
             if possible_circle == TO_WIN or possible_cross == TO_WIN:
                 can_win = True
-        
 
         if can_win:
             if cross_squares > circle_squares:
@@ -276,14 +275,19 @@ def smart_ai_move():
                 symbol_amount = circle_squares
             previous_cell = line[0]
             for cell in line:
-                if cell.what_symbol == "empty" and previous_cell.what_symbol == possible_win:
+                if (
+                    cell.what_symbol == "empty"
+                    and previous_cell.what_symbol == possible_win
+                ):
                     best_square = cell
                     break
-                if cell.what_symbol == possible_win and previous_cell.what_symbol == "empty":
+                if (
+                    cell.what_symbol == possible_win
+                    and previous_cell.what_symbol == "empty"
+                ):
                     best_square = previous_cell
                     break
                 previous_cell = cell
-
 
         return best_square, possible_win, symbol_amount
 
@@ -291,31 +295,55 @@ def smart_ai_move():
     for row in square_table:
         decide_best_move(check_line(row))
 
-
     # check columns
     for column in range(SIZE):
-        decide_best_move(list(check_line(square_table[row][column] for row in range(SIZE))))
-
-                    
+        decide_best_move(
+            list(check_line(square_table[row][column] for row in range(SIZE)))
+        )
 
     # check diagonals
     row = column = 0
     for diagonal in range(SIZE):
         # main diagonals
-        decide_best_move(list(check_line(square_table[diagonal + i][i] for i in range(SIZE - diagonal))))
+        decide_best_move(
+            list(
+                check_line(
+                    square_table[diagonal + i][i] for i in range(SIZE - diagonal)
+                )
+            )
+        )
 
-        decide_best_move(list(check_line(square_table[i][diagonal + i] for i in range(SIZE - diagonal))))
+        decide_best_move(
+            list(
+                check_line(
+                    square_table[i][diagonal + i] for i in range(SIZE - diagonal)
+                )
+            )
+        )
 
         # reverse diagonals
         if diagonal <= SIZE - TO_WIN:
-            decide_best_move(list(check_line(square_table[SIZE - diagonal - 1 - i][i] for i in range(SIZE - diagonal))))
+            decide_best_move(
+                list(
+                    check_line(
+                        square_table[SIZE - diagonal - 1 - i][i]
+                        for i in range(SIZE - diagonal)
+                    )
+                )
+            )
 
-            decide_best_move(list(check_line(square_table[SIZE - 1 - i][diagonal + i] for i in range(SIZE - diagonal))))
-
+            decide_best_move(
+                list(
+                    check_line(
+                        square_table[SIZE - 1 - i][diagonal + i]
+                        for i in range(SIZE - diagonal)
+                    )
+                )
+            )
 
     if state.order_or_chaos is None:
         raise ValueError("order_or_chaos not set")
-    
+
     if best_move.current_best_square:
         best_move.current_best_square.update(best_move.current_symbol, player="ai")
     else:
