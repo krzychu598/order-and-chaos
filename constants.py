@@ -2,12 +2,17 @@ import pygame
 
 # constants
 SIZE = 6
+TO_WIN = 5
 CELL_SIZE = 100
+
+# changing size of cell when chosen size of game is too big or too small
 MIN_SCREEN_SIZE = 500
+MAX_SCREEN_SIZE = 1000
 CELL_SIZE = max(CELL_SIZE, MIN_SCREEN_SIZE // SIZE)
+CELL_SIZE = min(CELL_SIZE, MAX_SCREEN_SIZE // SIZE)
+
 CROSS = "x"
 CIRCLE = "o"
-TO_WIN = 5
 screen_size = max(SIZE * CELL_SIZE, MIN_SCREEN_SIZE)
 cell_size = list([CELL_SIZE, CELL_SIZE])
 half_screen = screen_size // 2
