@@ -1,5 +1,5 @@
 # Porządek i Chaos
-## Krzysztof Wnorowski 04300602117
+## Krzysztof Wnorowski
 
 ## Opis projektu
 Projekt to prosta gra porządek i chaos stworzona w bibliotece pygame
